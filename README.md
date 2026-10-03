@@ -35,6 +35,8 @@ curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS.gpg -o downloads/SHA25
 元のハイブリッドブート構造を `-boot_image any replay` で引き継ぎ、媒体検査用 `md5sum.txt` も更新します。
 `nocloud/user-data` と `meta-data` はビルド時に生成します。ストレージ・ネットワークの自動構成は指定していません。
 
+作業時の検証範囲と結果は [VALIDATION.md](VALIDATION.md) を参照してください。
+
 ## 学生PCでの操作
 
 1. 必要なデータをバックアップし、BitLockerを使用している場合は回復キーを確保します。Windowsを初期化する場合は先にWindows側で行います。
