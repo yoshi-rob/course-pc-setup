@@ -74,6 +74,7 @@ cd ~/catkin_ws && catkin_make
 - EOLのNoeticをrosdepに読み込ませるため `--include-eol-distros --rosdistro=noetic` を指定します。
 - Desktopでネットワーク設定を使えるよう、インストーラで作成したnetplanをNetworkManagerへ引き継ぎます。
 - GitHubの可変mainではなく、ISO作成時のコミットとSHA256で `setup.sh` を固定します。
+- 仮想インストールで、Focalの更新処理がUbuntu Pro関連の設定ファイル確認を理由に停止することを確認しました。APTに `--force-confdef` / `--force-confold` を指定して既存設定を保持し、確認画面を出さずに更新します。更新自体は有効のままです。
 
 参照：[Ubuntu公式ISO](https://releases.ubuntu.com/20.04.6/)、[Autoinstall設定](https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html)、[NoCloud](https://docs.cloud-init.io/en/latest/reference/datasources/nocloud.html)、[ROSスナップショット鍵更新](https://discourse.ros.org/t/ros-signing-key-migration-guide/43937?page=2)。
 Ubuntu 20.04の標準サポートとROS Noeticのサポートは終了しています。この版を授業互換性のために使用します。[ROS公式EOL告知](https://discourse.ros.org/t/ros-noetic-end-of-life-may-31-2025/43160)

@@ -3,6 +3,14 @@ autoinstall:
   version: 1
   refresh-installer:
     update: false
+  # Focal's unattended-upgrades otherwise fails on ubuntu-pro conffile prompts.
+  apt:
+    conf: |
+      Dpkg::Options {
+        "--force-confdef";
+        "--force-confold";
+      };
+      Unattended-Upgrade::MinimalSteps "false";
   interactive-sections:
     - network
     - storage
