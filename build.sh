@@ -17,6 +17,8 @@ else
 fi
 gpgv --keyring "$UBUNTU_KEY" downloads/SHA256SUMS.gpg downloads/SHA256SUMS
 (cd downloads && grep 'ubuntu-20.04.6-live-server-amd64.iso$' SHA256SUMS | sha256sum -c -)
+# ISO directories are read-only after extraction; allow the next build to replace them.
+chmod -R u+w build/original
 tools/xorriso -osirrox on -overwrite on -indev "$ISO" -extract /boot/grub build/original/boot/grub -extract /isolinux build/original/isolinux -extract /md5sum.txt build/original/md5sum.txt
 python3 tools/customize_iso.py
 # Update the original media checksums for all changed and added files.
