@@ -17,7 +17,7 @@ else
 fi
 gpgv --keyring "$UBUNTU_KEY" downloads/SHA256SUMS.gpg downloads/SHA256SUMS
 (cd downloads && grep 'ubuntu-20.04.6-live-server-amd64.iso$' SHA256SUMS | sha256sum -c -)
-tools/xorriso -osirrox on -indev "$ISO" -extract /boot/grub build/original/boot/grub -extract /isolinux build/original/isolinux -extract /md5sum.txt build/original/md5sum.txt
+tools/xorriso -osirrox on -overwrite on -indev "$ISO" -extract /boot/grub build/original/boot/grub -extract /isolinux build/original/isolinux -extract /md5sum.txt build/original/md5sum.txt
 python3 tools/customize_iso.py
 # Update the original media checksums for all changed and added files.
 python3 - <<'PY'

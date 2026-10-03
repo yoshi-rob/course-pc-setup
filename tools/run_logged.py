@@ -6,7 +6,11 @@ import shlex
 import subprocess
 import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-log_path = pathlib.Path((ROOT / 'logs/current-log-path').read_text().strip())
+(ROOT / 'logs').mkdir(exist_ok=True)
+pointer = ROOT / 'logs/current-log-path'
+if not pointer.exists():
+    pointer.write_text(str(ROOT / 'logs' / ('setup-' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S') + '.log')) + '\n')
+log_path = pathlib.Path(pointer.read_text().strip())
 if len(sys.argv) < 2:
     raise SystemExit('Usage: run_logged.py COMMAND [ARG ...]')
 with log_path.open('a', buffering=1) as log:
