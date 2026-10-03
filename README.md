@@ -71,6 +71,7 @@ cd ~/catkin_ws && catkin_make
 - ROS最終スナップショットの署名鍵は通常の `rosdistro/master/ros.key` とは異なります。[Open Roboticsの公式Dockerfile](https://github.com/osrf/docker_images/blob/master/ros/noetic/ubuntu/focal/ros-core/Dockerfile) と同じ専用鍵 `4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA` を同梱します。現在の有効期限は2027-06-01で、以後は鍵更新と再ビルドが必要です。
 - 作業時にスナップショットのHTTPS証明書でホスト名不一致を確認しました。公式Dockerfileと同じHTTP配信を利用し、APTの署名・パッケージハッシュ検証を維持しています。TLS/署名検証を無効にしません。
 - curtinのchrootではsystemdが動かないため、`timedatectl` / `hostnamectl` ではなく設定ファイルを更新します。
+- このインストーラではidentityユーザーの作成が初回起動まで遅れるため、late-commands内でstudentユーザーがなければ作成します。rosdepやcatkinの設定はそのユーザーで実行します。
 - EOLのNoeticをrosdepに読み込ませるため `--include-eol-distros --rosdistro=noetic` を指定します。
 - Desktopでネットワーク設定を使えるよう、インストーラで作成したnetplanをNetworkManagerへ引き継ぎます。
 - GitHubの可変mainではなく、ISO作成時のコミットとSHA256で `setup.sh` を固定します。

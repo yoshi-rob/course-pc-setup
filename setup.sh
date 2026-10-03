@@ -16,7 +16,6 @@ if [[ ${ID:-} != ubuntu || ${VERSION_CODENAME:-} != focal || $(dpkg --print-arch
     echo "Ubuntu 20.04 Focal amd64 is required; no changes were made." >&2
     exit 1
 fi
-getent passwd "$COURSE_USER" >/dev/null
 exec > >(tee -a /var/log/course-setup.log) 2>&1
 PS4='+ ${BASH_SOURCE##*/}:${LINENO}: '
 set -x
@@ -28,6 +27,12 @@ on_error() {
 trap on_error ERR
 export DEBIAN_FRONTEND=noninteractive
 APT_OPTIONS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o Acquire::Retries=3)
+
+# Subiquity defers identity user creation to cloud-init on the first boot.
+# Desktop and rosdep need the user during late-commands, so create it now.
+if ! getent passwd "$COURSE_USER" >/dev/null; then
+    useradd -m -s /bin/bash -c Student -G adm,cdrom,dip,plugdev,sudo "$COURSE_USER"
+fi
 
 # Do not log the password value, even though this classroom default is public.
 set +x
