@@ -1,0 +1,29 @@
+#cloud-config
+autoinstall:
+  version: 1
+  refresh-installer:
+    update: false
+  interactive-sections:
+    - network
+    - storage
+  locale: ja_JP.UTF-8
+  keyboard:
+    layout: jp
+    variant: ""
+  identity:
+    hostname: course-pc
+    username: student
+    realname: Student
+    password: "@PASSWORD_HASH@"
+  ssh:
+    install-server: false
+  packages:
+    - curl
+    - ca-certificates
+  late-commands:
+    - mkdir -p /target/opt/course-setup/keys
+    - cp /cdrom/course-setup/keys/ros-snapshot.asc /target/opt/course-setup/keys/ros-snapshot.asc
+    - curtin in-target --target=/target -- curl -fL --retry 3 --connect-timeout 20 --max-time 180 @SETUP_URL@ -o /opt/course-setup/setup.sh
+    - echo '@SETUP_SHA256@  /target/opt/course-setup/setup.sh' | sha256sum -c -
+    - chmod 755 /target/opt/course-setup/setup.sh
+    - curtin in-target --target=/target -- bash /opt/course-setup/setup.sh

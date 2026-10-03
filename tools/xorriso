@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+if [[ -x "$ROOT/tools/local/usr/bin/xorriso" ]]; then
+    export LD_LIBRARY_PATH="$ROOT/tools/local/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    exec "$ROOT/tools/local/usr/bin/xorriso" "$@"
+fi
+exec xorriso "$@"

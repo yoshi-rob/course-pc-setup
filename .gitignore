@@ -1,0 +1,10 @@
+downloads/
+build/
+logs/
+tools/local/
+*.iso
+*.iso.sha256
+*.qcow2
+__pycache__/
+nocloud/user-data
+nocloud/meta-data
