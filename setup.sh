@@ -98,7 +98,7 @@ touch "$COURSE_HOME/.bashrc"
 if ! grep -Fxq 'source /opt/ros/noetic/setup.bash' "$COURSE_HOME/.bashrc"; then
     printf '\nsource /opt/ros/noetic/setup.bash\n' >> "$COURSE_HOME/.bashrc"
 fi
-install -d -o "$COURSE_USER" -g "$COURSE_USER" "$COURSE_HOME/catkin_ws/src"
+install -d -o "$COURSE_USER" -g "$COURSE_USER" "$COURSE_HOME/catkin_ws" "$COURSE_HOME/catkin_ws/src"
 sudo -u "$COURSE_USER" -H bash -c 'source /opt/ros/noetic/setup.bash; cd "$HOME/catkin_ws"; catkin_make'
 if ! grep -Fxq 'source ~/catkin_ws/devel/setup.bash' "$COURSE_HOME/.bashrc"; then
     printf 'source ~/catkin_ws/devel/setup.bash\n' >> "$COURSE_HOME/.bashrc"
