@@ -69,9 +69,11 @@ from gi.repository import Gio
 
 settings = Gio.Settings.new('org.gnome.shell')
 favorites = settings.get_strv('favorite-apps')
-for desktop_id in ('code.desktop', 'terminator.desktop'):
-    if not (Path('/usr/share/applications') / desktop_id).is_file():
-        raise RuntimeError(f'Missing application launcher: {desktop_id}')
+for candidates in (('com.microsoft.VSCode.desktop', 'code.desktop'), ('terminator.desktop',)):
+    desktop_id = next((name for name in candidates
+                       if (Path('/usr/share/applications') / name).is_file()), None)
+    if desktop_id is None:
+        raise RuntimeError(f'Missing application launcher: {candidates}')
     if desktop_id not in favorites:
         favorites.append(desktop_id)
 if not settings.set_strv('favorite-apps', favorites):
