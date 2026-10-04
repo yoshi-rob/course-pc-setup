@@ -34,8 +34,9 @@ APT_OPTIONS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-co
 # Subiquity defers identity user creation to cloud-init on the first boot.
 # Desktop and rosdep need the user during late-commands, so create it now.
 if ! getent passwd "$COURSE_USER" >/dev/null; then
-    useradd -m -s /bin/bash -c Student -G adm,cdrom,dip,plugdev,sudo "$COURSE_USER"
+    useradd -m -s /bin/bash -c "$COURSE_USER" -G adm,cdrom,dip,plugdev,sudo "$COURSE_USER"
 fi
+usermod -c "$COURSE_USER" "$COURSE_USER"
 
 # Do not log the password value, even though this classroom default is public.
 set +x
@@ -46,8 +47,8 @@ apt-get update
 apt-get install "${APT_OPTIONS[@]}" curl ca-certificates gnupg software-properties-common
 add-apt-repository -y universe
 apt-get update
-apt-get install "${APT_OPTIONS[@]}" \
-    ubuntu-desktop language-pack-ja language-pack-gnome-ja fonts-noto-cjk ibus-mozc \
+apt-get install "${APT_OPTIONS[@]}" --install-recommends \
+    linux-generic-hwe-20.04 ubuntu-desktop language-pack-ja language-pack-gnome-ja fonts-noto-cjk ibus-mozc \
     wget git vim nano unzip zip build-essential cmake pkg-config python3 python3-pip \
     sudo os-prober terminator
 # Install the official Microsoft Debian package; avoid Snap in curtin's chroot.
@@ -64,11 +65,11 @@ printf 'code code/add-microsoft-repo boolean false\n' | debconf-set-selections
 apt-get update
 apt-get install "${APT_OPTIONS[@]}" code
 
-# Write student favorites before the first login, using a private session bus.
+# Write desktop preferences before the first login, using a private session bus.
 # Ubuntu's existing favorites and any user customizations are kept.
 sudo -u "$COURSE_USER" -H env XDG_CURRENT_DESKTOP=ubuntu dbus-run-session -- python3 - <<'PY'
 from pathlib import Path
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 
 settings = Gio.Settings.new('org.gnome.shell')
 favorites = settings.get_strv('favorite-apps')
@@ -81,8 +82,24 @@ for candidates in (('com.microsoft.VSCode.desktop', 'code.desktop'), ('terminato
         favorites.append(desktop_id)
 if not settings.set_strv('favorite-apps', favorites):
     raise RuntimeError('Could not save the student favorites')
+interface = Gio.Settings.new('org.gnome.desktop.interface')
+if not interface.set_uint('scaling-factor', 1):
+    raise RuntimeError('Could not save 100% display scaling')
+if not interface.set_double('text-scaling-factor', 1.0):
+    raise RuntimeError('Could not save 100% text scaling')
+
+# GNOME selects its most recently used source when a session starts.
+# Put Mozc first in both lists, with the plain Japanese layout as a fallback.
+inputs = Gio.Settings.new('org.gnome.desktop.input-sources')
+sources = GLib.Variant('a(ss)', [('ibus', 'mozc-jp'), ('xkb', 'jp')])
+for key in ('sources', 'mru-sources'):
+    if not inputs.set_value(key, sources):
+        raise RuntimeError(f'Could not save input sources: {key}')
+if not inputs.set_uint('current', 0):
+    raise RuntimeError('Could not select Mozc')
 Gio.Settings.sync()
 print('Student favorites:', favorites)
+print('Display and text scaling: 100%; default input source: Mozc')
 PY
 
 locale-gen ja_JP.UTF-8
@@ -163,7 +180,7 @@ else
     printf '127.0.1.1 %s\n' "$NEW_HOSTNAME" >> /etc/hosts
 fi
 install -d /etc/default/grub.d
-printf 'GRUB_DISABLE_OS_PROBER=false\nGRUB_TIMEOUT_STYLE=menu\nGRUB_TIMEOUT=5\n' > /etc/default/grub.d/99-course.cfg
+printf 'GRUB_DEFAULT=0\nGRUB_DISABLE_OS_PROBER=false\nGRUB_TIMEOUT_STYLE=menu\nGRUB_TIMEOUT=5\n' > /etc/default/grub.d/99-course.cfg
 update-grub
 test -f /opt/ros/noetic/setup.bash
 sudo -u "$COURSE_USER" -H bash -c 'source /opt/ros/noetic/setup.bash; test "$(rosversion -d)" = noetic; rosversion -d'

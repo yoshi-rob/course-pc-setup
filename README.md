@@ -8,12 +8,14 @@ Intel/AMDの64-bit PCを対象とし、ネットワークとインストール�
 | 項目 | 内容 |
 | --- | --- |
 | OS | Ubuntu 20.04.6、Ubuntu Desktop |
-| 言語・入力 | 日本語、日本語キーボード、Mozc |
+| カーネル | HWE 5.15系（linux-generic-hwe-20.04）、標準の起動先 |
+| 表示倍率 | 100% |
+| 言語・入力 | 日本語、日本語キーボード、標準入力方式は日本語（Mozc） |
 | ROS | Noetic desktop-full（RViz・Gazebo）、rosdep、catkin-tools |
 | 機器ドライバ | ros-noetic-ypspur、ros-noetic-urg-node、ros-noetic-joy |
 | 開発環境 | VS Code、Terminator、Git、C/C++ビルドツール、CMake、Python 3、pip |
 | ワークスペース | /home/student1/coins_ws |
-| ユーザー名 | student1（sudo権限あり） |
+| ユーザー名・表示名 | student1（sudo権限あり） |
 | パスワード | student1 |
 | タイムゾーン | Asia/Tokyo |
 | ホスト名 | PCごとに異なる course-xxxxxxxx |

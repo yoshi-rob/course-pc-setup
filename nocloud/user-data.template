@@ -26,7 +26,7 @@ autoinstall:
   identity:
     hostname: course-pc
     username: student1
-    realname: Student
+    realname: student1
     password: "@PASSWORD_HASH@"
   ssh:
     install-server: false
