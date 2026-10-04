@@ -6,14 +6,31 @@ USBへの書き込み前まで準備しました。物理USB・学生PCのディ
 
 ## 作成物
 - カスタムISO: `course-ubuntu-20.04.iso`（約1.4 GiB）
-- ISO SHA256: `feefc31541a97862f5dd62d00cb24a6745232038bbbd668f24bc4e82601ce0b9`
-- ISOが取得するsetup.shの固定コミット: `5dc2c9909f990b5063846307469b63bdd1f8e7dc`
-- setup.sh SHA256: `90293cbf24a47434b85c89fa139467cc77a61314c0cb6391c73aea8c7492be45`
-- ログイン: `student` / `hogehoge`
+- ISO SHA256: `bdebf6c855486180bddaa722b635d076b84a91f8971773fa701f4efb71b89822`
+- ISOが取得するsetup.shの固定コミット: `9788bced757d5dc0c563d921db723b4b0c185f29`
+- setup.sh SHA256: `89c4c2401a999f20bf8c1302a90e59a28fc2b60b6b5b6de5dd9e5c81dd9c80e5`
+- ログイン: `student1` / `student1`
 - インターネット接続が必要です。DesktopやROSのパッケージはインストール時に取得します。
 - ネットワークとストレージは手動設定、その後の授業環境セットアップは自動です。
 
-## 検証結果
+## 現版: student1・授業用coins_ws同梱版の検証（2026-10-04 11時台）
+- ros-noetic-ypspur 1.22.5、ros-noetic-urg-node 0.1.18、ros-noetic-joy 1.15.1をsetupに追加。
+- インストーラidentityとsetupの両方でユーザー・パスワードをstudent1へ変更。
+- 授業資料1のcoins_ws/srcのみをISOへ同梱。coins_ex・ypspur_ros、launch・機体パラメータ・RViz設定等を含む。旧build・develはコピーせず、/home/student1/coins_wsで自動再ビルド。
+- 同梱版のurg_sbeego.launchをurg_speego.launchへ変更。元の授業資料は変更していない。
+- 授業コードはlocal-assets/のローカル保存とISO同梱のみ。公開GitHubには準備スクリプトとSHA256を保存し、コード本体・PDF・授業資料2以降は公開/同梱していない。
+- 既存Ubuntu20.04検証ディスクを親とする新しい差分ディスクで、コミット9788bceのsetup.sh全体を実行し成功。student1はこの試験で新規作成された。
+- 新規student1のcoins_wsビルド・実行ファイル生成、全ソース内容一致・所有者・実行権限を確認。
+- 新規student1の.bashrcは/opt/ros/noetic/setup.bashと~/coins_ws/devel/setup.bashを各1回読み込む。catkin_wsの読み込みなし。
+- student1 / student1で文字コンソールへ実際にログイン成功。インストーラのパスワードハッシュとVMのパスワードも検証。
+- student1の新しい対話シェルでnoetic、rospack find coins_ex/ypspur_ros、roslaunch --nodes coins_ex urg_speego.launch/joypad.launchが成功。
+- student1のGNOMEお気に入りにcom.microsoft.VSCode.desktop・terminator.desktopがあることを確認。
+- ISOのSHA256、媒体チェック376項目、NoCloud identity、同梱アーカイブのSHA256、手動ネットワーク・ストレージ指定を確認。
+- 現版ISOから空のディスクへの通しインストールは未実施。実機モータ・LiDAR・ジョイパッド動作も未検証。
+- ログ: logs/vm-student1-setup.log、logs/vm-student1-verify.log、logs/vm-student1-login-user.log、logs/student1-media-checksums.log。文字コンソールのログイン画像: logs/vm-student1-login.png。
+
+## 旧版で実施した検証
+以下はstudent / hogehoge・旧版ISOで実施した履歴です。現版の追加変更に対する検証は上記を参照してください。
 | 検証 | 結果 |
 | --- | --- |
 | Ubuntu公式ISOの署名・SHA256 | 合格 |
