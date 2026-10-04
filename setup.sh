@@ -95,16 +95,36 @@ if not interface.set_uint('scaling-factor', 1):
 if not interface.set_double('text-scaling-factor', 1.0):
     raise RuntimeError('Could not save 100% text scaling')
 
-# GNOME selects its most recently used source when a session starts.
-# Put Mozc first in both lists, with the plain Japanese layout as a fallback.
+# Reuse the configured Mozc entry and preserve the other input sources.
 inputs = Gio.Settings.new('org.gnome.desktop.input-sources')
-sources = GLib.Variant('a(ss)', [('ibus', 'mozc-jp'), ('xkb', 'jp')])
-for key in ('sources', 'mru-sources'):
-    if not inputs.set_value(key, sources):
-        raise RuntimeError(f'Could not save input sources: {key}')
-if not inputs.set_uint('current', 0):
+mozc = ('ibus', 'mozc-jp')
+configured = inputs.get_value('sources').unpack()
+sources = []
+for source in configured:
+    source = tuple(source)
+    if source == mozc and mozc in sources:
+        continue
+    sources.append(source)
+# A fresh account has no sources until GNOME's first-login initialization.
+if not sources:
+    sources.append(('xkb', 'jp'))
+if mozc not in sources:
+    sources.append(mozc)
+if sources != configured:
+    if not inputs.set_value('sources', GLib.Variant('a(ss)', sources)):
+        raise RuntimeError('Could not save input sources')
+recent = [mozc] + [source for source in sources if source != mozc]
+if not inputs.set_value('mru-sources', GLib.Variant('a(ss)', recent)):
+    raise RuntimeError('Could not select Mozc for the next login')
+if not inputs.set_uint('current', sources.index(mozc)):
     raise RuntimeError('Could not select Mozc')
 Gio.Settings.sync()
+# Focal's keyboard daemon otherwise appends the locale's IBus engine again
+# on its first run, even when that engine is already in the configured list.
+stamp = Path(GLib.get_user_data_dir()) / 'gnome-settings-daemon/input-sources-converted'
+stamp.parent.mkdir(parents=True, exist_ok=True)
+stamp.touch(exist_ok=True)
+print('Input sources:', sources)
 print('Student favorites:', favorites)
 print('Display and text scaling: 100%; default input source: Mozc')
 PY

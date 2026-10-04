@@ -21,6 +21,7 @@ Intel/AMDの64-bit PCを対象とし、ネットワークとインストール�
 | ホスト名 | PCごとに異なる course-xxxxxxxx |
 
 VS Code・Terminator・設定をドックのお気に入りに登録します。
+入力ソースは既存の日本語（Mozc）を選択し、Mozcの重複登録を整理します。
 
 授業資料1のワークスペースのソースをISOに同梱し、学生ユーザーの所有で展開・ビルドします。
 coins_ex・ypspur_ros、起動設定、機体パラメータ、RViz設定を含みます。
