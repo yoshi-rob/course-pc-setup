@@ -26,6 +26,11 @@ on_error() {
 }
 trap on_error ERR
 SETUP_ROOT=$(dirname "$(readlink -f "$0")")
+# Record and check the fetched revision before changing the target.
+if [[ -f "$SETUP_ROOT/setup-ref.txt" ]]; then
+    printf '[COURSE SETUP] source commit: %s\n' "$(cat "$SETUP_ROOT/setup-ref.txt")"
+    (cd "$SETUP_ROOT" && sha256sum -c setup.sh.sha256)
+fi
 # Fail before installing packages if the ISO's classroom sources are missing.
 (cd "$SETUP_ROOT" && sha256sum -c course-workspace.sha256)
 export DEBIAN_FRONTEND=noninteractive

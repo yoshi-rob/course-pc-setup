@@ -33,6 +33,15 @@ source /opt/ros/noetic/setup.bash
 source ~/coins_ws/devel/setup.bash
 ```
 
+## セットアップの更新
+
+インストール時にGitHubのmainブランチから最新コミットを取得し、そのコミットのsetup.shを実行します。
+お気に入りやインストール項目はsetup.shを変更してmainへpushすると、同じUSBで次にインストールするPCに反映されます。
+実行したコミットとスクリプトのSHA256をインストール先に記録します。
+
+授業ソース・署名鍵・ユーザー設定などISOに同梱する内容の変更には、ISOの再作成とUSBへの再書き込みが必要です。
+インストール済みPCは自動更新されません。
+
 ## ISOの作成
 
 Ubuntu上で xorriso、curl、openssl、gnupg、python3-yaml、ubuntu-keyring を用意します。
@@ -46,9 +55,9 @@ Ubuntu上で xorriso、curl、openssl、gnupg、python3-yaml、ubuntu-keyring �
    ソースをそのままアーカイブ化し、学生PCでbuild・develを生成します。
    コード本体はlocal-assets/に保存され、Gitの対象外です。
 
-2. setup.shとcourse-workspace.sha256がコミットされ、GitHubへpushされていることを確認します。
+2. mainに使用するsetup.shを公開し、course-workspace.sha256と同梱ソースのSHA256が一致することを確認します。
 
-   ビルドはコミットを固定し、公開されたsetup.shと手元のファイルの一致、および同梱ソースのSHA256を確認します。
+   ビルド時に同梱ソースのSHA256を検証します。setup.shはインストール時に取得します。
 
 3. Ubuntu公式ISOと検証用ファイルを取得し、ビルドします。
 
@@ -84,6 +93,8 @@ WindowsがGRUBに表示されない場合は、UEFI起動メニューのWindows 
 | logs/setup-*.log | 作業コマンド・出力 |
 | /var/log/course-setup.log | インストール先のセットアップログ |
 | /var/log/installer/ | インストーラのログ |
+| /opt/course-setup/setup-ref.txt | 実行したsetup.shのコミット |
+| /opt/course-setup/setup.sh.sha256 | 実行したsetup.shのSHA256 |
 | /var/lib/course-setup/complete | セットアップの完了日時 |
 
 作業ログと検証記録はローカルに保存し、Gitの対象外です。

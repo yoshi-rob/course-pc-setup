@@ -35,6 +35,7 @@ for filename in ('user-data', 'meta-data'):
 changed['./course-setup/keys/ros-snapshot.asc'] = root / 'keys/ros-snapshot.asc'
 changed['./course-setup/coins_ws-src.tar.gz'] = root / 'local-assets/coins_ws-src.tar.gz'
 changed['./course-setup/course-workspace.sha256'] = root / 'course-workspace.sha256'
+changed['./course-setup/fetch-setup.sh'] = root / 'fetch-setup.sh'
 changed['./course-setup/installer-apt.conf'] = root / 'installer-apt.conf'
 lines = []
 for line in (root / 'build/original/md5sum.txt').read_text().splitlines():
@@ -58,6 +59,7 @@ tools/xorriso -indev "$ISO" -outdev "$OUTPUT.part" -overwrite on \
     -map keys/ros-snapshot.asc /course-setup/keys/ros-snapshot.asc \
     -map local-assets/coins_ws-src.tar.gz /course-setup/coins_ws-src.tar.gz \
     -map course-workspace.sha256 /course-setup/course-workspace.sha256 \
+    -map fetch-setup.sh /course-setup/fetch-setup.sh \
     -map installer-apt.conf /course-setup/installer-apt.conf \
     -map build/md5sum.txt /md5sum.txt \
     -boot_image any replay -compliance no_emul_toc
