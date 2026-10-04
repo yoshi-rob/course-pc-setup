@@ -6,9 +6,9 @@ USBへの書き込み前まで準備しました。物理USB・学生PCのディ
 
 ## 作成物
 - カスタムISO: `course-ubuntu-20.04.iso`（約1.4 GiB）
-- ISO SHA256: `ac55fb316c06e3f9db16ca29ed27235055c29ac45f0b24092f72cd1b6733938b`
-- ISOが取得するsetup.shの固定コミット: `4b86a4d99825ecc55b04c7d158e350db4d302c45`
-- setup.sh SHA256: `bed7c96ed30178bede5cda03c0452f8e28f977768ea6cc5ab5f5f8553f5be67c`
+- ISO SHA256: `feefc31541a97862f5dd62d00cb24a6745232038bbbd668f24bc4e82601ce0b9`
+- ISOが取得するsetup.shの固定コミット: `5dc2c9909f990b5063846307469b63bdd1f8e7dc`
+- setup.sh SHA256: `90293cbf24a47434b85c89fa139467cc77a61314c0cb6391c73aea8c7492be45`
 - ログイン: `student` / `hogehoge`
 - インターネット接続が必要です。DesktopやROSのパッケージはインストール時に取得します。
 - ネットワークとストレージは手動設定、その後の授業環境セットアップは自動です。
@@ -65,3 +65,10 @@ README.mdの手順に従ってください。USBの実デバイスを確認し�
 - 追加版ISOのSHA256と媒体チェック374項目が成功。新規ディスクからの通しインストールは未実施。
 - ログ: logs/vm-editors-setup.log、logs/editors-media-checksums.log、logs/vm-vscode.png、logs/vm-editors-final.png。文字コンソールでのTerminator確認はDISPLAYがないため失敗し、デスクトップ上で再確認しました。
 - GDB・htop・tmuxは既にインストール済み。python3-venv・Meld・VS Code拡張機能は追加候補で、今回は追加していません。
+
+## お気に入り登録版の検証（2026-10-04 10時台）
+- studentのGNOMEお気に入りにVS CodeとTerminatorを追加。既存の並びを保持し、登録済みの項目は重複追加しません。設定はロックせず、学生が後から変更できます。
+- VS Codeの現在のランチャーcom.microsoft.VSCode.desktopと従来のcode.desktopの両方に対応します。
+- 起動済みUbuntu 20.04仮想PCのログイン前にsetup.sh全体を再実行し、プライベートD-Busセッションから設定を保存。セットアップ成功後、studentでログインし、両アプリを起動していない状態でドックにアイコンが表示されることを確認。
+- 追加版ISOのSHA256と媒体チェック374項目が成功。新規ディスクからの通しインストールは未実施。
+- ログ: logs/vm-favorites-setup.log、logs/favorites-media-checksums.log、logs/vm-favorites-desktop.png。ランチャー名の変更に対応するまでの失敗試行も作業ログに保存。
