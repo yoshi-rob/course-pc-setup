@@ -9,3 +9,4 @@ __pycache__/
 nocloud/user-data
 nocloud/meta-data
 local-assets/
+VALIDATION.md

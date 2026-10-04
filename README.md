@@ -1,94 +1,99 @@
-# 授業用 Ubuntu 20.04.6 + ROS Noetic セットアップ
+# 授業用 Ubuntu セットアップ
 
-Windowsを残したまま、旧Ubuntuの領域へ授業用環境を入れ直すためのカスタムISOを作成します。
-対象はIntel/AMDの64-bit PCです。ARMやApple Siliconには使用できません。
+学生PCに Ubuntu 20.04.6 と ROS Noetic の授業環境を導入するカスタムISOです。
+Intel/AMDの64-bit PCを対象とし、ネットワークとインストール先の領域を手動で選択した後、授業環境を自動セットアップします。インストール時はインターネット接続が必要です。
 
-## インストール内容
+## 環境構成
 
-- Ubuntu 20.04.6をベースにしたUbuntu Desktop、日本語ロケール・日本語キーボード・Mozc
-- ROS Noetic desktop-full（Gazebo、RVizを含む）、rosdep、catkin-tools、ypspur・urg-node・joy、授業用coins_ws
-- VS Code（Microsoft公式APTリポジトリの安定版）、Terminator。両アプリをstudent1のドックのお気に入りへ追加
-- Git、C/C++ビルドツール、CMake、Python 3、pip
-- タイムゾーン Asia/Tokyo、PCごとに異なる `course-xxxxxxxx` ホスト名
-- 共通ユーザー `student1`、共通パスワード `student1`（sudo権限あり）。SSHサーバーは追加しません。
+| 項目 | 内容 |
+| --- | --- |
+| OS | Ubuntu 20.04.6、Ubuntu Desktop |
+| 言語・入力 | 日本語、日本語キーボード、Mozc |
+| ROS | Noetic desktop-full（RViz・Gazebo）、rosdep、catkin-tools |
+| 機器ドライバ | ros-noetic-ypspur、ros-noetic-urg-node、ros-noetic-joy |
+| 開発環境 | VS Code、Terminator、Git、C/C++ビルドツール、CMake、Python 3、pip |
+| ワークスペース | /home/student1/coins_ws |
+| ユーザー名 | student1（sudo権限あり） |
+| パスワード | student1 |
+| タイムゾーン | Asia/Tokyo |
+| ホスト名 | PCごとに異なる course-xxxxxxxx |
 
-授業資料1のcoins_wsソース（coins_ex・ypspur_ros、launch・機体パラメータ・RViz設定）だけをISOに同梱し、~/coins_wsへ展開して自動ビルドします。urg_sbeego.launchは同梱版でurg_speego.launchに修正しています。PDFや授業資料2以降の課題コードは含めません。授業コードはlocal-assets/に保存し、公開GitHubへは送信しません。Ubuntu標準パッケージとROSパッケージをネットから取得するため、インストール時はインターネット接続が必要です。
-共通パスワードはこの公開リポジトリで意図的に管理しています。
+VS CodeとTerminatorをドックのお気に入りに登録します。
+
+授業資料1のワークスペースのソースをISOに同梱し、学生ユーザーの所有で展開・ビルドします。
+coins_ex・ypspur_ros、起動設定、機体パラメータ、RViz設定を含みます。
+授業PDFと他の回の課題コードは同梱対象外です。
+
+.bashrcに以下を設定し、新しいターミナルでROSと授業ワークスペースを利用できます。
+
+```bash
+source /opt/ros/noetic/setup.bash
+source ~/coins_ws/devel/setup.bash
+```
 
 ## ISOの作成
 
-Ubuntu上で `xorriso curl openssl gnupg python3-yaml ubuntu-keyring` を用意します。
-今回の作業PCではsudoがパスワードを要求するため、作成ツールを `tools/local/` へ展開して使用しています。ホストOSにDesktopやROSをインストールしません。
+Ubuntu上で xorriso、curl、openssl、gnupg、python3-yaml、ubuntu-keyring を用意します。
 
-```bash
-python3 tools/prepare_workspace.py /path/to/lesson1/coins_ws
-mkdir -p downloads
-curl -fL --retry 3 https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso -o downloads/ubuntu-20.04.6-live-server-amd64.iso
-curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS -o downloads/SHA256SUMS
-curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS.gpg -o downloads/SHA256SUMS.gpg
-./build.sh
-```
+1. 手元の授業資料1のワークスペースから、同梱用ファイルを作成します。
 
-最初に手元の授業資料1からワークスペース同梱ファイルを準備します。srcだけを取り込み、旧build・develは再生成します。生成したcourse-workspace.sha256はコミット対象ですが、local-assets/のコード本体はGitの対象外です。
+   ```bash
+   python3 tools/prepare_workspace.py /path/to/lesson1/coins_ws
+   ```
 
-先に変更した `setup.sh` をコミットしてGitHubへpushしてください。`build.sh` はHEADのコミットを固定し、GitHubから実際に取得できることとローカルとの一致を確認します。
-特定版を使う場合は `SETUP_REF=<40桁のコミットSHA> ./build.sh` とします。そのコミットのsetup.sh・course-workspace.sha256と作業コピーが一致する必要があります。ワークスペース同梱ファイルのSHA256も確認します。
+   srcを取り込み、学生PCでbuild・develを生成します。
+   コード本体はlocal-assets/に保存され、Gitの対象外です。
 
-出力は `course-ubuntu-20.04.iso` と `course-ubuntu-20.04.iso.sha256` です。
-元ISOの署名とSHA256を確認し、UEFI（GRUB）とBIOS（ISOLINUX）の両方の起動設定を変更します。
-元のハイブリッドブート構造を `-boot_image any replay` で引き継ぎ、媒体検査用 `md5sum.txt` も更新します。
-`nocloud/user-data` と `meta-data` はビルド時に生成します。ストレージ・ネットワークの自動構成は指定していません。
+2. setup.shとcourse-workspace.sha256がコミットされ、GitHubへpushされていることを確認します。
 
-作業時の検証範囲と結果は [VALIDATION.md](VALIDATION.md) を参照してください。
+   ビルドはコミットを固定し、公開されたsetup.shと手元のファイルの一致、および同梱ソースのSHA256を確認します。
 
-VS Codeは署名鍵を限定したMicrosoft公式APTリポジトリから `code` をインストールします。TerminatorはUbuntuの `terminator` パッケージです。既存のお気に入りを保持して両アプリを末尾に追加します。学生はログイン後に並べ替え・削除できます。VS Codeの拡張機能はまだ自動追加していません。[MicrosoftのLinuxインストール手順](https://code.visualstudio.com/docs/setup/linux)
+3. Ubuntu公式ISOと検証用ファイルを取得し、ビルドします。
 
-## 学生PCでの操作
+   ```bash
+   mkdir -p downloads
+   curl -fL --retry 3 https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso -o downloads/ubuntu-20.04.6-live-server-amd64.iso
+   curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS -o downloads/SHA256SUMS
+   curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS.gpg -o downloads/SHA256SUMS.gpg
+   ./build.sh
+   ```
 
-1. 必要なデータをバックアップし、BitLockerを使用している場合は回復キーを確保します。Windowsを初期化する場合は先にWindows側で行います。
-2. カスタムISOを書き込んだUSBから **UEFI** で起動し、`Install Course Ubuntu 20.04` を選びます。
-3. ネットワーク設定画面で有線LANまたはWi-Fiを設定します。Wi-Fiの対応はPCの無線チップとドライバーによります。有線LAN/対応USB LANを代替手段にしてください。
-4. Storage画面で **Custom storage layout（手動）** を選びます。「ディスク全体を使う」は選びません。
-5. WindowsのNTFS、Microsoft Reserved、Recovery、既存EFIパーティションを残します。**既存EFIは削除・フォーマットしません。** `/boot/efi` として再利用します。
-6. 旧Ubuntuの領域を実際の内容とサイズで確認し、その領域だけを置き換えてext4の `/` を作成します。番号だけで判断しないでください。対象が不明ならここで止めます。
-7. 書き込み内容を確認してインストールを開始します。その後DesktopとROSの設定が自動で続きます。大量のパッケージをダウンロードするため、回線によって時間がかかります。
-8. 成功後に再起動し、USBを抜いて `student1` / `student1` でログインします。Windowsも起動することを確認します。
+出力は course-ubuntu-20.04.iso と course-ubuntu-20.04.iso.sha256 です。
+元ISOの署名・SHA256を検証し、BIOS・UEFIの起動に対応するISOを作成します。
 
-WindowsのGRUB表示はos-proberの検出に依存します。表示されない場合はUEFI起動メニューのWindows Boot Managerで起動を確認し、Ubuntu上で `sudo update-grub` を実行してください。
-この方式はパーティション選択を自動判定しません。Windowsを残せるかは手動設定の内容で決まります。
+## 学生PCへのインストール
 
-## ログと成功確認
+1. 必要なデータをバックアップします。BitLockerを使用している場合は回復キーを確保します。
+2. ISOを書き込んだUSBからUEFIで起動し、Install Course Ubuntu 20.04を選びます。
+3. 有線LANまたはWi-Fiを設定します。
+4. Storage画面でCustom storage layout（手動）を選択します。
+5. Windowsの領域と既存EFIパーティションを保持し、Ubuntu用の領域にext4の / を設定します。既存EFIはフォーマットせず、/boot/efiとして再利用します。
+6. 書き込み内容を確認し、インストールを開始します。Desktop・ROS・授業ワークスペースの設定が自動で進みます。
+7. 再起動後、USBを抜き、student1 / student1でログインします。Windowsを残す場合はWindowsの起動も確認します。
 
-- ISO作成：`logs/build.log`
-- この作業セッションの全コマンド・出力：`logs/setup-*.log`（ローカル保存、GitHubには公開しません）
-- インストール先でのコマンド・出力：`/var/log/course-setup.log`
-- インストーラのログ：`/var/log/installer/`
-- 全セットアップ成功時だけ作成：`/var/lib/course-setup/complete`
+Wi-Fiの利用可否はPCの無線チップとドライバに依存します。
+WindowsがGRUBに表示されない場合は、UEFI起動メニューのWindows Boot Managerから起動できます。
+
+## ログと動作確認
+
+| 保存先 | 内容 |
+| --- | --- |
+| logs/build.log | ISO作成ログ |
+| logs/setup-*.log | 作業コマンド・出力 |
+| /var/log/course-setup.log | インストール先のセットアップログ |
+| /var/log/installer/ | インストーラのログ |
+| /var/lib/course-setup/complete | セットアップの完了日時 |
+
+作業ログと検証記録はローカルに保存し、Gitの対象外です。
+
+学生PCのターミナルで確認できます。
 
 ```bash
 test -f /var/lib/course-setup/complete
-source /opt/ros/noetic/setup.bash
-rosversion -d                 # noetic
-source ~/coins_ws/devel/setup.bash
+rosversion -d
 rospack find coins_ex
 rospack find ypspur_ros
-roslaunch --nodes coins_ex urg_speego.launch
 ```
 
-失敗時はインストーラがエラー停止し、成功マーカーは作成しません。ログで原因を直した後、インストーラのシェルから `curtin in-target --target=/target -- bash /opt/course-setup/setup.sh` を再実行できます。
-
-## 添付案から修正した点・参照先
-
-- ROS最終スナップショットの署名鍵は通常の `rosdistro/master/ros.key` とは異なります。[Open Roboticsの公式Dockerfile](https://github.com/osrf/docker_images/blob/master/ros/noetic/ubuntu/focal/ros-core/Dockerfile) と同じ専用鍵 `4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA` を同梱します。現在の有効期限は2027-06-01で、以後は鍵更新と再ビルドが必要です。
-- 作業時にスナップショットのHTTPS証明書でホスト名不一致を確認しました。公式Dockerfileと同じHTTP配信を利用し、APTの署名・パッケージハッシュ検証を維持しています。TLS/署名検証を無効にしません。
-- curtinのchrootではsystemdが動かないため、`timedatectl` / `hostnamectl` ではなく設定ファイルを更新します。
-- このインストーラではidentityユーザーの作成が初回起動まで遅れるため、late-commands内でstudent1ユーザーがなければ作成します。rosdepやcatkinの設定はそのユーザーで実行します。
-- EOLのNoeticをrosdepに読み込ませるため `--include-eol-distros --rosdistro=noetic` を指定します。
-- Desktopでネットワーク設定を使えるよう、インストーラで作成したnetplanをNetworkManagerへ引き継ぎます。
-- GitHubの可変mainではなく、ISO作成時のコミットとSHA256で `setup.sh` を固定します。
-- 仮想インストールで、Focalの更新処理がUbuntu Pro関連の設定ファイル確認を理由に停止することを確認しました。APTに `--force-confdef` / `--force-confold` を指定して既存設定を保持し、確認画面を出さずに更新します。旧curtinが一時的にAPT設定を削除するため、インストール中のsystemd一時サービスに `APT_CONFIG` を設定し、ISO内の `installer-apt.conf` を参照させます。late-commands開始時とエラー時にこの環境変数を解除します。更新自体は有効のままです。
-
-参照：[Ubuntu公式ISO](https://releases.ubuntu.com/20.04.6/)、[Autoinstall設定](https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html)、[NoCloud](https://docs.cloud-init.io/en/latest/reference/datasources/nocloud.html)、[ROSスナップショット鍵更新](https://discourse.ros.org/t/ros-signing-key-migration-guide/43937?page=2)。
-Ubuntu 20.04の標準サポートとROS Noeticのサポートは終了しています。この版を授業互換性のために使用します。[ROS公式EOL告知](https://discourse.ros.org/t/ros-noetic-end-of-life-may-31-2025/43160)
-
-USBへの書き込みは今回の作業対象外です。USBを接続後、対象ディスクを確認してから別途行います。
+rosversion -dはnoetic、各パッケージの場所は/home/student1/coins_ws/src以下になります。
+機器の利用時は、USBデバイス名とアクセス権を実機で確認してください。
