@@ -61,6 +61,25 @@ printf 'code code/add-microsoft-repo boolean false\n' | debconf-set-selections
 apt-get update
 apt-get install "${APT_OPTIONS[@]}" code
 
+# Write student favorites before the first login, using a private session bus.
+# Ubuntu's existing favorites and any user customizations are kept.
+sudo -u "$COURSE_USER" -H env XDG_CURRENT_DESKTOP=ubuntu dbus-run-session -- python3 - <<'PY'
+from pathlib import Path
+from gi.repository import Gio
+
+settings = Gio.Settings.new('org.gnome.shell')
+favorites = settings.get_strv('favorite-apps')
+for desktop_id in ('code.desktop', 'terminator.desktop'):
+    if not (Path('/usr/share/applications') / desktop_id).is_file():
+        raise RuntimeError(f'Missing application launcher: {desktop_id}')
+    if desktop_id not in favorites:
+        favorites.append(desktop_id)
+if not settings.set_strv('favorite-apps', favorites):
+    raise RuntimeError('Could not save the student favorites')
+Gio.Settings.sync()
+print('Student favorites:', favorites)
+PY
+
 locale-gen ja_JP.UTF-8
 update-locale LANG=ja_JP.UTF-8 LANGUAGE=ja_JP:ja
 # systemd is not running inside curtin's chroot: use files instead of *ctl calls.

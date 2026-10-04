@@ -7,7 +7,7 @@ Windowsを残したまま、旧Ubuntuの領域へ授業用環境を入れ直す�
 
 - Ubuntu 20.04.6をベースにしたUbuntu Desktop、日本語ロケール・日本語キーボード・Mozc
 - ROS Noetic desktop-full（Gazebo、RVizを含む）、rosdep、catkin-tools、catkinワークスペース
-- VS Code（Microsoft公式APTリポジトリの安定版）、Terminator
+- VS Code（Microsoft公式APTリポジトリの安定版）、Terminator。両アプリをstudentのドックのお気に入りへ追加
 - Git、C/C++ビルドツール、CMake、Python 3、pip
 - タイムゾーン Asia/Tokyo、PCごとに異なる `course-xxxxxxxx` ホスト名
 - 共通ユーザー `student`、共通パスワード `hogehoge`（sudo権限あり）。SSHサーバーは追加しません。
@@ -38,7 +38,7 @@ curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS.gpg -o downloads/SHA25
 
 作業時の検証範囲と結果は [VALIDATION.md](VALIDATION.md) を参照してください。
 
-VS Codeは署名鍵を限定したMicrosoft公式APTリポジトリから `code` をインストールします。TerminatorはUbuntuの `terminator` パッケージです。VS Codeの拡張機能はまだ自動追加していません。[MicrosoftのLinuxインストール手順](https://code.visualstudio.com/docs/setup/linux)
+VS Codeは署名鍵を限定したMicrosoft公式APTリポジトリから `code` をインストールします。TerminatorはUbuntuの `terminator` パッケージです。既存のお気に入りを保持して両アプリを末尾に追加します。学生はログイン後に並べ替え・削除できます。VS Codeの拡張機能はまだ自動追加していません。[MicrosoftのLinuxインストール手順](https://code.visualstudio.com/docs/setup/linux)
 
 ## 学生PCでの操作
 
