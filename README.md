@@ -35,13 +35,13 @@ source ~/coins_ws/devel/setup.bash
 
 Ubuntu上で xorriso、curl、openssl、gnupg、python3-yaml、ubuntu-keyring を用意します。
 
-1. 手元の授業資料1のワークスペースから、同梱用ファイルを作成します。
+1. 同梱する授業用ソースをlocal-assets/coins_ws/srcに配置し、アーカイブを作成します。
 
    ```bash
-   python3 tools/prepare_workspace.py /path/to/lesson1/coins_ws
+   python3 tools/prepare_workspace.py
    ```
 
-   srcを取り込み、学生PCでbuild・develを生成します。
+   ソースをそのままアーカイブ化し、学生PCでbuild・develを生成します。
    コード本体はlocal-assets/に保存され、Gitの対象外です。
 
 2. setup.shとcourse-workspace.sha256がコミットされ、GitHubへpushされていることを確認します。
