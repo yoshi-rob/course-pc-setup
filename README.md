@@ -20,7 +20,7 @@ Intel/AMDの64-bit PCを対象とし、ネットワークとインストール�
 | タイムゾーン | Asia/Tokyo |
 | ホスト名 | PCごとに異なる course-xxxxxxxx |
 
-VS CodeとTerminatorをドックのお気に入りに登録します。
+VS Code・Terminator・設定をドックのお気に入りに登録します。
 
 授業資料1のワークスペースのソースをISOに同梱し、学生ユーザーの所有で展開・ビルドします。
 coins_ex・ypspur_ros、起動設定、機体パラメータ、RViz設定を含みます。

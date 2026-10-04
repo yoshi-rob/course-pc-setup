@@ -73,7 +73,9 @@ from gi.repository import Gio, GLib
 
 settings = Gio.Settings.new('org.gnome.shell')
 favorites = settings.get_strv('favorite-apps')
-for candidates in (('com.microsoft.VSCode.desktop', 'code.desktop'), ('terminator.desktop',)):
+for candidates in (('com.microsoft.VSCode.desktop', 'code.desktop'),
+                   ('terminator.desktop',),
+                   ('org.gnome.Settings.desktop', 'gnome-control-center.desktop')):
     desktop_id = next((name for name in candidates
                        if (Path('/usr/share/applications') / name).is_file()), None)
     if desktop_id is None:
