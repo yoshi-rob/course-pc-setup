@@ -8,3 +8,4 @@ tools/local/
 __pycache__/
 nocloud/user-data
 nocloud/meta-data
+local-assets/

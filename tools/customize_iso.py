@@ -14,12 +14,19 @@ if not re.fullmatch(r'[0-9a-f]{40}', revision):
 committed_script = subprocess.check_output(['git', 'show', revision + ':setup.sh'], cwd=root)
 if committed_script != (root / 'setup.sh').read_bytes():
     raise SystemExit('Commit setup.sh before building: local source differs from SETUP_REF')
-password_hash = subprocess.check_output(['openssl', 'passwd', '-6', '-stdin'], input='hogehoge\n', text=True).strip()
+workspace_manifest = (root / 'course-workspace.sha256').read_bytes()
+if subprocess.check_output(['git', 'show', revision + ':course-workspace.sha256'], cwd=root) != workspace_manifest:
+    raise SystemExit('Commit the workspace manifest before building')
+expected_digest, archive_name = workspace_manifest.decode().split()
+assert archive_name == 'coins_ws-src.tar.gz'
+assert hashlib.sha256((root / 'local-assets' / archive_name).read_bytes()).hexdigest() == expected_digest, 'Workspace archive differs from pinned manifest'
+password_hash = subprocess.check_output(['openssl', 'passwd', '-6', '-stdin'], input='student1\n', text=True).strip()
 setup_url = f'https://raw.githubusercontent.com/yoshi-rob/course-pc-setup/{revision}/setup.sh'
 setup_sha = hashlib.sha256(committed_script).hexdigest()
 template = (root / 'nocloud/user-data.template').read_text()
 config = template.replace('@PASSWORD_HASH@', password_hash).replace('@SETUP_URL@', setup_url).replace('@SETUP_SHA256@', setup_sha)
 data = yaml.safe_load(config)['autoinstall']
+assert data['identity']['username'] == 'student1'
 assert data['interactive-sections'] == ['network', 'storage']
 assert 'storage' not in data and 'network' not in data
 assert '@SETUP' not in config

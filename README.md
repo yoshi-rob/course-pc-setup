@@ -6,13 +6,13 @@ Windowsを残したまま、旧Ubuntuの領域へ授業用環境を入れ直す�
 ## インストール内容
 
 - Ubuntu 20.04.6をベースにしたUbuntu Desktop、日本語ロケール・日本語キーボード・Mozc
-- ROS Noetic desktop-full（Gazebo、RVizを含む）、rosdep、catkin-tools、catkinワークスペース
-- VS Code（Microsoft公式APTリポジトリの安定版）、Terminator。両アプリをstudentのドックのお気に入りへ追加
+- ROS Noetic desktop-full（Gazebo、RVizを含む）、rosdep、catkin-tools、ypspur・urg-node・joy、授業用coins_ws
+- VS Code（Microsoft公式APTリポジトリの安定版）、Terminator。両アプリをstudent1のドックのお気に入りへ追加
 - Git、C/C++ビルドツール、CMake、Python 3、pip
 - タイムゾーン Asia/Tokyo、PCごとに異なる `course-xxxxxxxx` ホスト名
-- 共通ユーザー `student`、共通パスワード `hogehoge`（sudo権限あり）。SSHサーバーは追加しません。
+- 共通ユーザー `student1`、共通パスワード `student1`（sudo権限あり）。SSHサーバーは追加しません。
 
-授業資料や課題コードは含めません。Ubuntu標準パッケージとROSパッケージをネットから取得するため、インストール時はインターネット接続が必要です。
+授業資料1のcoins_wsソース（coins_ex・ypspur_ros、launch・機体パラメータ・RViz設定）だけをISOに同梱し、~/coins_wsへ展開して自動ビルドします。urg_sbeego.launchは同梱版でurg_speego.launchに修正しています。PDFや授業資料2以降の課題コードは含めません。授業コードはlocal-assets/に保存し、公開GitHubへは送信しません。Ubuntu標準パッケージとROSパッケージをネットから取得するため、インストール時はインターネット接続が必要です。
 共通パスワードはこの公開リポジトリで意図的に管理しています。
 
 ## ISOの作成
@@ -21,6 +21,7 @@ Ubuntu上で `xorriso curl openssl gnupg python3-yaml ubuntu-keyring` を用意�
 今回の作業PCではsudoがパスワードを要求するため、作成ツールを `tools/local/` へ展開して使用しています。ホストOSにDesktopやROSをインストールしません。
 
 ```bash
+python3 tools/prepare_workspace.py /path/to/lesson1/coins_ws
 mkdir -p downloads
 curl -fL --retry 3 https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso -o downloads/ubuntu-20.04.6-live-server-amd64.iso
 curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS -o downloads/SHA256SUMS
@@ -28,8 +29,10 @@ curl -fsSL https://releases.ubuntu.com/20.04.6/SHA256SUMS.gpg -o downloads/SHA25
 ./build.sh
 ```
 
+最初に手元の授業資料1からワークスペース同梱ファイルを準備します。srcだけを取り込み、旧build・develは再生成します。生成したcourse-workspace.sha256はコミット対象ですが、local-assets/のコード本体はGitの対象外です。
+
 先に変更した `setup.sh` をコミットしてGitHubへpushしてください。`build.sh` はHEADのコミットを固定し、GitHubから実際に取得できることとローカルとの一致を確認します。
-特定版を使う場合は `SETUP_REF=<40桁のコミットSHA> ./build.sh` とします。そのコミットの `setup.sh` と作業コピーが一致する必要があります。
+特定版を使う場合は `SETUP_REF=<40桁のコミットSHA> ./build.sh` とします。そのコミットのsetup.sh・course-workspace.sha256と作業コピーが一致する必要があります。ワークスペース同梱ファイルのSHA256も確認します。
 
 出力は `course-ubuntu-20.04.iso` と `course-ubuntu-20.04.iso.sha256` です。
 元ISOの署名とSHA256を確認し、UEFI（GRUB）とBIOS（ISOLINUX）の両方の起動設定を変更します。
@@ -49,7 +52,7 @@ VS Codeは署名鍵を限定したMicrosoft公式APTリポジトリから `code`
 5. WindowsのNTFS、Microsoft Reserved、Recovery、既存EFIパーティションを残します。**既存EFIは削除・フォーマットしません。** `/boot/efi` として再利用します。
 6. 旧Ubuntuの領域を実際の内容とサイズで確認し、その領域だけを置き換えてext4の `/` を作成します。番号だけで判断しないでください。対象が不明ならここで止めます。
 7. 書き込み内容を確認してインストールを開始します。その後DesktopとROSの設定が自動で続きます。大量のパッケージをダウンロードするため、回線によって時間がかかります。
-8. 成功後に再起動し、USBを抜いて `student` / `hogehoge` でログインします。Windowsも起動することを確認します。
+8. 成功後に再起動し、USBを抜いて `student1` / `student1` でログインします。Windowsも起動することを確認します。
 
 WindowsのGRUB表示はos-proberの検出に依存します。表示されない場合はUEFI起動メニューのWindows Boot Managerで起動を確認し、Ubuntu上で `sudo update-grub` を実行してください。
 この方式はパーティション選択を自動判定しません。Windowsを残せるかは手動設定の内容で決まります。
@@ -66,7 +69,10 @@ WindowsのGRUB表示はos-proberの検出に依存します。表示されない
 test -f /var/lib/course-setup/complete
 source /opt/ros/noetic/setup.bash
 rosversion -d                 # noetic
-cd ~/catkin_ws && catkin_make
+source ~/coins_ws/devel/setup.bash
+rospack find coins_ex
+rospack find ypspur_ros
+roslaunch --nodes coins_ex urg_speego.launch
 ```
 
 失敗時はインストーラがエラー停止し、成功マーカーは作成しません。ログで原因を直した後、インストーラのシェルから `curtin in-target --target=/target -- bash /opt/course-setup/setup.sh` を再実行できます。
@@ -76,7 +82,7 @@ cd ~/catkin_ws && catkin_make
 - ROS最終スナップショットの署名鍵は通常の `rosdistro/master/ros.key` とは異なります。[Open Roboticsの公式Dockerfile](https://github.com/osrf/docker_images/blob/master/ros/noetic/ubuntu/focal/ros-core/Dockerfile) と同じ専用鍵 `4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA` を同梱します。現在の有効期限は2027-06-01で、以後は鍵更新と再ビルドが必要です。
 - 作業時にスナップショットのHTTPS証明書でホスト名不一致を確認しました。公式Dockerfileと同じHTTP配信を利用し、APTの署名・パッケージハッシュ検証を維持しています。TLS/署名検証を無効にしません。
 - curtinのchrootではsystemdが動かないため、`timedatectl` / `hostnamectl` ではなく設定ファイルを更新します。
-- このインストーラではidentityユーザーの作成が初回起動まで遅れるため、late-commands内でstudentユーザーがなければ作成します。rosdepやcatkinの設定はそのユーザーで実行します。
+- このインストーラではidentityユーザーの作成が初回起動まで遅れるため、late-commands内でstudent1ユーザーがなければ作成します。rosdepやcatkinの設定はそのユーザーで実行します。
 - EOLのNoeticをrosdepに読み込ませるため `--include-eol-distros --rosdistro=noetic` を指定します。
 - Desktopでネットワーク設定を使えるよう、インストーラで作成したnetplanをNetworkManagerへ引き継ぎます。
 - GitHubの可変mainではなく、ISO作成時のコミットとSHA256で `setup.sh` を固定します。

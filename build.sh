@@ -33,6 +33,8 @@ for path in (root / 'build/patched').rglob('*'):
 for filename in ('user-data', 'meta-data'):
     changed['./nocloud/' + filename] = root / 'nocloud' / filename
 changed['./course-setup/keys/ros-snapshot.asc'] = root / 'keys/ros-snapshot.asc'
+changed['./course-setup/coins_ws-src.tar.gz'] = root / 'local-assets/coins_ws-src.tar.gz'
+changed['./course-setup/course-workspace.sha256'] = root / 'course-workspace.sha256'
 changed['./course-setup/installer-apt.conf'] = root / 'installer-apt.conf'
 lines = []
 for line in (root / 'build/original/md5sum.txt').read_text().splitlines():
@@ -54,6 +56,8 @@ tools/xorriso -indev "$ISO" -outdev "$OUTPUT.part" -overwrite on \
     -map nocloud/user-data /nocloud/user-data \
     -map nocloud/meta-data /nocloud/meta-data \
     -map keys/ros-snapshot.asc /course-setup/keys/ros-snapshot.asc \
+    -map local-assets/coins_ws-src.tar.gz /course-setup/coins_ws-src.tar.gz \
+    -map course-workspace.sha256 /course-setup/course-workspace.sha256 \
     -map installer-apt.conf /course-setup/installer-apt.conf \
     -map build/md5sum.txt /md5sum.txt \
     -boot_image any replay -compliance no_emul_toc

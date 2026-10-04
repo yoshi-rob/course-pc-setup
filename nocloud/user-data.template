@@ -25,7 +25,7 @@ autoinstall:
     variant: ""
   identity:
     hostname: course-pc
-    username: student
+    username: student1
     realname: Student
     password: "@PASSWORD_HASH@"
   ssh:
@@ -36,6 +36,7 @@ autoinstall:
   late-commands:
     - systemctl unset-environment APT_CONFIG
     - mkdir -p /target/opt/course-setup/keys
+    - cp /cdrom/course-setup/coins_ws-src.tar.gz /cdrom/course-setup/course-workspace.sha256 /target/opt/course-setup/
     - cp /cdrom/course-setup/keys/ros-snapshot.asc /target/opt/course-setup/keys/ros-snapshot.asc
     - curtin in-target --target=/target -- curl -fL --retry 3 --connect-timeout 20 --max-time 180 @SETUP_URL@ -o /opt/course-setup/setup.sh
     - echo '@SETUP_SHA256@  /target/opt/course-setup/setup.sh' | sha256sum -c -

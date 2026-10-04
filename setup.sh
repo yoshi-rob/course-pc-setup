@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Run only inside the installed Ubuntu Focal target (curtin in-target).
 set -Eeuo pipefail
-COURSE_USER="student"
-STUDENT_PASSWORD="hogehoge"
+COURSE_USER="student1"
+STUDENT_PASSWORD="student1"
 ROS_REPOSITORY="http://snapshots.ros.org/noetic/final/ubuntu"
 SNAPSHOT_FINGERPRINT="4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA"
 
@@ -25,6 +25,9 @@ on_error() {
     exit "$status"
 }
 trap on_error ERR
+SETUP_ROOT=$(dirname "$(readlink -f "$0")")
+# Fail before installing packages if the ISO's classroom sources are missing.
+(cd "$SETUP_ROOT" && sha256sum -c course-workspace.sha256)
 export DEBIAN_FRONTEND=noninteractive
 APT_OPTIONS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o Acquire::Retries=3)
 
@@ -109,7 +112,7 @@ PY
 netplan generate
 
 # Snapshots use a DIFFERENT signing key from rosdistro/master/ros.key.
-KEY_SOURCE="$(dirname "$(readlink -f "$0")")/keys/ros-snapshot.asc"
+KEY_SOURCE="$SETUP_ROOT/keys/ros-snapshot.asc"
 test -s "$KEY_SOURCE"
 actual_fingerprint=$(gpg --batch --show-keys --with-colons "$KEY_SOURCE" | awk -F: '$1 == "fpr" { print $10; exit }')
 test "$actual_fingerprint" = "$SNAPSHOT_FINGERPRINT"
@@ -119,7 +122,8 @@ printf 'deb [arch=amd64 signed-by=/usr/share/keyrings/ros-snapshot-archive-keyri
     "$ROS_REPOSITORY" > /etc/apt/sources.list.d/course-ros-noetic.list
 apt-get update
 apt-get install "${APT_OPTIONS[@]}" \
-    ros-noetic-desktop-full python3-rosdep python3-rosinstall \
+    ros-noetic-desktop-full ros-noetic-ypspur ros-noetic-urg-node ros-noetic-joy \
+    python3-rosdep python3-rosinstall \
     python3-rosinstall-generator python3-wstool python3-catkin-tools
 
 if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
@@ -133,10 +137,15 @@ touch "$COURSE_HOME/.bashrc"
 if ! grep -Fxq 'source /opt/ros/noetic/setup.bash' "$COURSE_HOME/.bashrc"; then
     printf '\nsource /opt/ros/noetic/setup.bash\n' >> "$COURSE_HOME/.bashrc"
 fi
-install -d -o "$COURSE_USER" -g "$COURSE_USER" "$COURSE_HOME/catkin_ws" "$COURSE_HOME/catkin_ws/src"
-sudo -u "$COURSE_USER" -H bash -c 'source /opt/ros/noetic/setup.bash; cd "$HOME/catkin_ws"; catkin_make'
-if ! grep -Fxq 'source ~/catkin_ws/devel/setup.bash' "$COURSE_HOME/.bashrc"; then
-    printf 'source ~/catkin_ws/devel/setup.bash\n' >> "$COURSE_HOME/.bashrc"
+install -d -o "$COURSE_USER" -g "$COURSE_USER" "$COURSE_HOME/coins_ws" "$COURSE_HOME/coins_ws/src"
+# The archive contains lesson 1 src only; old build/devel paths are regenerated.
+tar -xzf "$SETUP_ROOT/coins_ws-src.tar.gz" --no-same-owner --skip-old-files -C "$COURSE_HOME/coins_ws"
+chown -R "$COURSE_USER:$COURSE_USER" "$COURSE_HOME/coins_ws"
+sudo -u "$COURSE_USER" -H bash -c 'source /opt/ros/noetic/setup.bash; cd "$HOME/coins_ws"; catkin_make'
+# Replace the former workspace source line if this setup is re-run.
+sed -i '\|^source ~/catkin_ws/devel/setup.bash$|d' "$COURSE_HOME/.bashrc"
+if ! grep -Fxq 'source ~/coins_ws/devel/setup.bash' "$COURSE_HOME/.bashrc"; then
+    printf 'source ~/coins_ws/devel/setup.bash\n' >> "$COURSE_HOME/.bashrc"
 fi
 chown "$COURSE_USER:$COURSE_USER" "$COURSE_HOME/.bashrc"
 
