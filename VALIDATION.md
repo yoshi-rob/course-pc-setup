@@ -6,9 +6,9 @@ USBへの書き込み前まで準備しました。物理USB・学生PCのディ
 
 ## 作成物
 - カスタムISO: `course-ubuntu-20.04.iso`（約1.4 GiB）
-- ISO SHA256: `7e8d7fa70c84b99f5bf77e0bedadde0d2fa319b4aed6ffc372d687320e98b873`
-- ISOが取得するsetup.shの固定コミット: `421acc8cb81b4d641d2efc761ec8ccb7c6ea5ddb`
-- setup.sh SHA256: `e3c71ca2de61307f87bf8703b55a51836dae96df8a973cd190aab9e83d804726`
+- ISO SHA256: `ac55fb316c06e3f9db16ca29ed27235055c29ac45f0b24092f72cd1b6733938b`
+- ISOが取得するsetup.shの固定コミット: `4b86a4d99825ecc55b04c7d158e350db4d302c45`
+- setup.sh SHA256: `bed7c96ed30178bede5cda03c0452f8e28f977768ea6cc5ab5f5f8553f5be67c`
 - ログイン: `student` / `hogehoge`
 - インターネット接続が必要です。DesktopやROSのパッケージはインストール時に取得します。
 - ネットワークとストレージは手動設定、その後の授業環境セットアップは自動です。
@@ -30,7 +30,7 @@ USBへの書き込み前まで準備しました。物理USB・学生PCのディ
 | NetworkManager・display-manager | active |
 | ロケール・タイムゾーン・固有ホスト名 | ja_JP.UTF-8、Asia/Tokyo、course-ddafdf79を確認 |
 
-検証は段階に分けて実施しました。OSインストール後のスクリプト検証で不具合を修正し、同じ仮想PCの/target内へ最終版setup.shを取得して、curtin in-targetから手動で再実行しました。ISO内の指定SHA256と実行したsetup.shの一致を確認しています。**最終ISOを空のディスクから最後まで一度も中断せずにインストールする再試験は未実施**です。
+検証は段階に分けて実施しました。OSインストール後のスクリプト検証で不具合を修正し、同じ仮想PCの/target内へ当時の修正版setup.shを取得して、curtin in-targetから手動で再実行しました。今回のVS Code・Terminator追加版は、起動済みUbuntu 20.04仮想PCでsetup.sh全体を再実行しました。ISO内の指定SHA256と実行したsetup.shの一致を確認しています。**最終ISOを空のディスクから最後まで一度も中断せずにインストールする再試験は未実施**です。
 
 ## 実際の検証で修正した問題
 - Ubuntu Pro関連の設定ファイル確認で自動更新が停止: ISO内のAPT設定をsystemd一時サービスへ渡して解消。
@@ -56,3 +56,12 @@ GRUB更新時には仮想USBの/dev/sda1に対するgrub-probe警告が残りま
 ## USB接続後
 README.mdの手順に従ってください。USBの実デバイスを確認してから書き込みます。
 学生PCでは旧Ubuntu領域を手動で選び、Windowsと既存EFI領域を保持します。実機の無線LAN、Secure Boot、Windowsの起動は未検証です。
+
+## VS Code・Terminator追加版の検証（2026-10-04 10時台）
+- Microsoftの署名付きAPTリポジトリからcode 1.140.0-1790759618をインストール。追加APTソースはcourse-vscode.listに一本化。
+- Ubuntuからterminator 1.91-4ubuntu1をインストール。
+- setup.sh全体が成功し、rosdep・catkin・ROS Noeticの確認も成功。
+- studentで両アプリのGUI起動とバージョン表示を確認。
+- 追加版ISOのSHA256と媒体チェック374項目が成功。新規ディスクからの通しインストールは未実施。
+- ログ: logs/vm-editors-setup.log、logs/editors-media-checksums.log、logs/vm-vscode.png、logs/vm-editors-final.png。文字コンソールでのTerminator確認はDISPLAYがないため失敗し、デスクトップ上で再確認しました。
+- GDB・htop・tmuxは既にインストール済み。python3-venv・Meld・VS Code拡張機能は追加候補で、今回は追加していません。
