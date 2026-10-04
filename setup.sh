@@ -46,7 +46,21 @@ apt-get update
 apt-get install "${APT_OPTIONS[@]}" \
     ubuntu-desktop language-pack-ja language-pack-gnome-ja fonts-noto-cjk ibus-mozc \
     wget git vim nano unzip zip build-essential cmake pkg-config python3 python3-pip \
-    sudo os-prober
+    sudo os-prober terminator
+# Install the official Microsoft Debian package; avoid Snap in curtin's chroot.
+MICROSOFT_KEY=$(mktemp)
+curl -fsSL --retry 3 --connect-timeout 20 --max-time 180 \
+    https://packages.microsoft.com/keys/microsoft.asc -o "$MICROSOFT_KEY"
+gpg --batch --yes --dearmor -o /usr/share/keyrings/course-microsoft.gpg "$MICROSOFT_KEY"
+rm -f "$MICROSOFT_KEY"
+chmod 644 /usr/share/keyrings/course-microsoft.gpg
+printf 'deb [arch=amd64 signed-by=/usr/share/keyrings/course-microsoft.gpg] https://packages.microsoft.com/repos/code stable main\n' \
+    > /etc/apt/sources.list.d/course-vscode.list
+# We manage the source and key above, so do not let code add a second source.
+printf 'code code/add-microsoft-repo boolean false\n' | debconf-set-selections
+apt-get update
+apt-get install "${APT_OPTIONS[@]}" code
+
 locale-gen ja_JP.UTF-8
 update-locale LANG=ja_JP.UTF-8 LANGUAGE=ja_JP:ja
 # systemd is not running inside curtin's chroot: use files instead of *ctl calls.
