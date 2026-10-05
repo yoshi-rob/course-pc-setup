@@ -8,7 +8,7 @@ Intel/AMDの64-bit PCを対象とし、ネットワークとインストール�
 | 項目 | 内容 |
 | --- | --- |
 | OS | Ubuntu 20.04.6、Ubuntu Desktop |
-| カーネル | HWE 5.15系（linux-generic-hwe-20.04）、標準の起動先 |
+| カーネル | インストーラ・インストール後ともにHWE 5.15系を標準で使用 |
 | 表示倍率 | 100% |
 | 言語・入力 | 日本語、日本語キーボード、標準入力方式は日本語（Mozc） |
 | ROS | Noetic desktop-full（RViz・Gazebo）、rosdep、catkin-tools |
@@ -72,6 +72,7 @@ Ubuntu上で xorriso、curl、openssl、gnupg、python3-yaml、ubuntu-keyring �
 
 出力は course-ubuntu-20.04.iso と course-ubuntu-20.04.iso.sha256 です。
 元ISOの署名・SHA256を検証し、BIOS・UEFIの起動に対応するISOを作成します。
+インストーラは公式ISO同梱のHWEカーネル5.15.0-67と対応するinitrdを使用します。5.4系で起動する予備メニューも用意しています。
 
 ## 学生PCへのインストール
 

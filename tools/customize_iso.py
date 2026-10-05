@@ -27,6 +27,23 @@ for relative in ['boot/grub/grub.cfg', 'boot/grub/loopback.cfg', 'isolinux/txt.c
     if not original.exists():
         continue
     text = original.read_text()
+    # Boot the official ISO's matching HWE kernel/initrd by default.
+    # Keep its GA kernel as an explicit fallback for older machines.
+    if relative == 'boot/grub/grub.cfg':
+        primary, separator, fallback = text.partition("submenu 'Boot and Install with the HWE kernel'")
+        assert separator, 'Official HWE boot entry is missing'
+        primary = primary.replace('/casper/vmlinuz', '/casper/hwe-vmlinuz').replace('/casper/initrd', '/casper/hwe-initrd')
+        fallback = fallback.replace('/casper/hwe-vmlinuz', '/casper/vmlinuz').replace('/casper/hwe-initrd', '/casper/initrd')
+        text = primary + "submenu 'Fallback: install with the 5.4 kernel'" + fallback
+    elif relative == 'boot/grub/loopback.cfg':
+        text = text.replace('/casper/vmlinuz', '/casper/hwe-vmlinuz').replace('/casper/initrd', '/casper/hwe-initrd')
+    else:
+        primary, separator, fallback = text.partition('label hwe-live')
+        assert separator, 'Official BIOS HWE boot entry is missing'
+        primary = primary.replace('/casper/vmlinuz', '/casper/hwe-vmlinuz').replace('/casper/initrd', '/casper/hwe-initrd')
+        fallback = fallback.replace('/casper/hwe-vmlinuz', '/casper/vmlinuz').replace('/casper/hwe-initrd', '/casper/initrd')
+        fallback = fallback.replace('Install Ubuntu Server with the HWE kernel', 'Install Ubuntu Server (fallback: 5.4 kernel)')
+        text = primary + 'label hwe-live' + fallback
     if relative.startswith('boot/grub/'):
         text = re.sub(r'^set timeout=.*$', 'set timeout=5', text, flags=re.M)
         # GRUB removes quotes, preserving the semicolon within the ds argument.
